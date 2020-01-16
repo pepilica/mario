@@ -5,8 +5,8 @@ import os
 
 FPS = 50
 clock = pygame.time.Clock()
-WIDTH, HEIGHT = 640, 480
-screen = pygame.display.set_mode((200, 200))
+WIDTH, HEIGHT = 300, 300
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 LVL_NAME = ''
 
 
@@ -145,9 +145,27 @@ class Player(pygame.sprite.Sprite):
             self.rect = self.rect.move(0, 10)
 
 
+class Camera:
+    # зададим начальный сдвиг камеры
+    def __init__(self):
+        self.dx = 0
+        self.dy = 0
+
+    # сдвинуть объект obj на смещение камеры
+    def apply(self, obj):
+        obj.rect.x += self.dx
+        obj.rect.y += self.dy
+
+    # позиционировать камеру на объекте target
+    def update(self, target):
+        self.dx = -(target.rect.x + target.rect.w // 2 - WIDTH // 2)
+        self.dy = -(target.rect.y + target.rect.h // 2 - HEIGHT // 2)
+
+
 def main():
+    camera = Camera()
     player, level_x, level_y = generate_level(load_level(LVL_NAME))
-    screen = pygame.display.set_mode((level_x * 50, level_y * 50))
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
     running = True
     while running:
         for i in pygame.event.get():
@@ -162,6 +180,9 @@ def main():
                     player.left()
                 if i.key == pygame.K_RIGHT:
                     player.right()
+        camera.update(player)
+        for sprite in all_sprites:
+            camera.apply(sprite)
         all_sprites.draw(screen)
         player_group.draw(screen)
         pygame.display.flip()
