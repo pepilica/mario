@@ -7,6 +7,7 @@ FPS = 50
 clock = pygame.time.Clock()
 WIDTH, HEIGHT = 640, 480
 screen = pygame.display.set_mode((200, 200))
+LVL_NAME = ''
 
 
 def load_image(name, colorkey=None):
@@ -27,6 +28,7 @@ def terminate():
 
 
 def start_screen():
+    global LVL_NAME
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     intro_text = ["ЗАСТАВКА", "",
                   "Правила игры",
@@ -45,7 +47,13 @@ def start_screen():
         intro_rect.x = 10
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
-
+    LVL_NAME = input('Введите название уровня в папке data:\t')
+    try:
+        with open('data/' + LVL_NAME) as f:
+            pass
+    except:
+        print('Уровня не существует')
+        terminate()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -123,22 +131,22 @@ class Player(pygame.sprite.Sprite):
 
     def right(self):
         self.rect = self.rect.move(10, 0)
-        if pygame.sprite.spritecollideany(self, all_sprites):
+        if pygame.sprite.spritecollideany(self, walls):
             self.rect = self.rect.move(-10, 0)
 
     def back(self):
         self.rect = self.rect.move(0, 10)
-        if pygame.sprite.spritecollideany(self, all_sprites):
+        if pygame.sprite.spritecollideany(self, walls):
             self.rect = self.rect.move(0, -10)
 
     def forward(self):
         self.rect = self.rect.move(0, -10)
-        if pygame.sprite.spritecollideany(self, all_sprites):
+        if pygame.sprite.spritecollideany(self, walls):
             self.rect = self.rect.move(0, 10)
 
 
 def main():
-    player, level_x, level_y = generate_level(load_level('map.txt'))
+    player, level_x, level_y = generate_level(load_level(LVL_NAME))
     screen = pygame.display.set_mode((level_x * 50, level_y * 50))
     running = True
     while running:
